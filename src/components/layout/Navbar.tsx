@@ -1,5 +1,4 @@
 
-
 import { useState } from "react";
 import { NavLink } from "react-router-dom";
 import { Menu, X } from "lucide-react";
@@ -13,6 +12,7 @@ const NavItems = [
   { name: "Portfólio", path: "/portfolio" },
   { name: "Loja", path: "/loja" },
   { name: "Contato", path: "/contato" },
+  { name: "Admin", path: "/admin" },
 ];
 
 export function Navbar() {
