@@ -1,4 +1,5 @@
 
+
 import { useState } from "react";
 import { NavLink } from "react-router-dom";
 import { Menu, X } from "lucide-react";
@@ -25,7 +26,7 @@ export function Navbar() {
     <header className="fixed top-0 left-0 right-0 z-40 bg-background/80 backdrop-blur-md border-b transition-all duration-300">
       <div className="container-custom py-4 flex items-center justify-between">
         <div className="flex items-center">
-          <NavLink to="/" className="font-playfair font-bold text-2xl">
+          <NavLink to="/" className="font-playfair font-bold text-2xl text-beige">
             ARTE
           </NavLink>
         </div>
@@ -38,8 +39,8 @@ export function Navbar() {
               to={item.path}
               className={({ isActive }) =>
                 cn(
-                  "text-sm uppercase tracking-wider hover:text-primary/80 transition-colors",
-                  isActive ? "font-medium" : "font-normal"
+                  "text-sm uppercase tracking-wider hover:text-beige transition-colors",
+                  isActive ? "font-medium text-beige" : "font-normal"
                 )
               }
             >
@@ -56,7 +57,7 @@ export function Navbar() {
             variant="ghost"
             size="icon"
             onClick={toggleMenu}
-            className="ml-2"
+            className="ml-2 text-beige hover:text-beige/80"
           >
             {isMenuOpen ? <X /> : <Menu />}
           </Button>
@@ -80,7 +81,7 @@ export function Navbar() {
               className={({ isActive }) =>
                 cn(
                   "text-lg uppercase tracking-wider transition-colors",
-                  isActive ? "font-medium" : "font-normal"
+                  isActive ? "font-medium text-beige" : "font-normal"
                 )
               }
             >

@@ -1,4 +1,5 @@
 
+
 import { NavLink } from "react-router-dom";
 
 export function Footer() {
@@ -7,35 +8,35 @@ export function Footer() {
       <div className="container-custom">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div>
-            <h3 className="font-playfair text-xl mb-4">ARTE</h3>
+            <h3 className="font-playfair text-xl mb-4 text-beige">ARTE</h3>
             <p className="text-muted-foreground max-w-xs">
               Criando arte contemporânea e inovadora que inspira e transforma espaços.
             </p>
           </div>
           
           <div>
-            <h3 className="font-playfair text-xl mb-4">Links</h3>
+            <h3 className="font-playfair text-xl mb-4 text-beige">Links</h3>
             <nav className="flex flex-col space-y-2">
-              <NavLink to="/" className="text-muted-foreground hover:text-foreground transition-colors">
+              <NavLink to="/" className="text-muted-foreground hover:text-beige transition-colors">
                 Home
               </NavLink>
-              <NavLink to="/sobre-mim" className="text-muted-foreground hover:text-foreground transition-colors">
+              <NavLink to="/sobre-mim" className="text-muted-foreground hover:text-beige transition-colors">
                 Sobre Mim
               </NavLink>
-              <NavLink to="/portfolio" className="text-muted-foreground hover:text-foreground transition-colors">
+              <NavLink to="/portfolio" className="text-muted-foreground hover:text-beige transition-colors">
                 Portfólio
               </NavLink>
-              <NavLink to="/loja" className="text-muted-foreground hover:text-foreground transition-colors">
+              <NavLink to="/loja" className="text-muted-foreground hover:text-beige transition-colors">
                 Loja
               </NavLink>
-              <NavLink to="/contato" className="text-muted-foreground hover:text-foreground transition-colors">
+              <NavLink to="/contato" className="text-muted-foreground hover:text-beige transition-colors">
                 Contato
               </NavLink>
             </nav>
           </div>
           
           <div>
-            <h3 className="font-playfair text-xl mb-4">Contato</h3>
+            <h3 className="font-playfair text-xl mb-4 text-beige">Contato</h3>
             <address className="not-italic text-muted-foreground">
               <p>São Paulo, Brasil</p>
               <p className="mt-2">contato@arteexemplo.com</p>

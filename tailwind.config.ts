@@ -67,7 +67,7 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-				beige: "#F5F5DC",
+				beige: "#D7B788", // Added beige color
 				ivory: "#FFFFF0",
 				charcoal: "#333333",
 			},
