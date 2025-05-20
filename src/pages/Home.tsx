@@ -1,5 +1,4 @@
 
-
 import { Button } from "@/components/ui/button";
 import { NavLink } from "react-router-dom";
 import { ArrowRight, ShoppingBag } from "lucide-react";
@@ -93,9 +92,15 @@ const Home = () => {
                   <p className="font-medium mt-2">R$ {(150 + item * 50).toLocaleString('pt-BR')}</p>
                 </CardContent>
                 <CardFooter className="pt-0">
-                  <Button variant="outline" className="w-full rounded-full gap-2 border-beige text-beige hover:bg-beige/10">
-                    <ShoppingBag className="h-4 w-4" />
-                    Adicionar ao Carrinho
+                  <Button 
+                    variant="default" 
+                    className="w-full rounded-full gap-2 bg-beige hover:bg-beige/90 text-foreground font-medium"
+                    asChild
+                  >
+                    <NavLink to={`/produto/${item}`}>
+                      <ShoppingBag className="h-4 w-4" />
+                      Comprar
+                    </NavLink>
                   </Button>
                 </CardFooter>
               </Card>
