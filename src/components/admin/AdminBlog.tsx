@@ -4,7 +4,22 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { Pencil, Plus, Trash } from "lucide-react";
+import { 
+  Pencil, 
+  Plus, 
+  Trash, 
+  Bold, 
+  Italic, 
+  Underline, 
+  Strikethrough,
+  AlignLeft,
+  AlignCenter, 
+  AlignRight,
+  ListOrdered,
+  ListUnordered,
+  Link,
+  Unlink
+} from "lucide-react";
 
 // Mock blog post data structure
 interface BlogPost {
@@ -55,11 +70,27 @@ const initialBlogPosts: BlogPost[] = [
 // Blog post categories
 const CATEGORIES = ["Técnicas", "Arte Digital", "Tendências", "Pessoal", "Notícias", "Dicas"];
 
+// Format buttons configuration
+const FORMAT_BUTTONS = [
+  { icon: Bold, command: 'bold', tooltip: 'Negrito' },
+  { icon: Italic, command: 'italic', tooltip: 'Itálico' },
+  { icon: Underline, command: 'underline', tooltip: 'Sublinhado' },
+  { icon: Strikethrough, command: 'strikeThrough', tooltip: 'Tachado' },
+  { icon: AlignLeft, command: 'justifyLeft', tooltip: 'Alinhar à esquerda' },
+  { icon: AlignCenter, command: 'justifyCenter', tooltip: 'Centralizar' },
+  { icon: AlignRight, command: 'justifyRight', tooltip: 'Alinhar à direita' },
+  { icon: ListOrdered, command: 'insertOrderedList', tooltip: 'Lista numerada' },
+  { icon: ListUnordered, command: 'insertUnorderedList', tooltip: 'Lista com marcadores' },
+  { icon: Link, command: 'createLink', tooltip: 'Inserir link', prompt: 'Digite a URL:' },
+  { icon: Unlink, command: 'unlink', tooltip: 'Remover link' },
+];
+
 export const AdminBlog = () => {
   const [blogPosts, setBlogPosts] = useState<BlogPost[]>(initialBlogPosts);
   const [editingPost, setEditingPost] = useState<BlogPost | null>(null);
   const [isAddingPost, setIsAddingPost] = useState(false);
   const { toast } = useToast();
+  const [editorContent, setEditorContent] = useState("");
 
   // Form state for new/editing post
   const [formData, setFormData] = useState<Partial<BlogPost>>({
@@ -72,9 +103,60 @@ export const AdminBlog = () => {
     category: "Técnicas"
   });
 
+  // Reference to the content editor iframe
+  const [editorRef, setEditorRef] = useState<HTMLIFrameElement | null>(null);
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  // Initialize the editor when the component mounts or when editing a post
+  const initEditor = (iframe: HTMLIFrameElement | null) => {
+    if (!iframe) return;
+    
+    // Store the reference
+    setEditorRef(iframe);
+    
+    const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+    if (!iframeDoc) return;
+    
+    // Setup the editor document
+    iframeDoc.designMode = "on";
+    iframeDoc.body.innerHTML = formData.content || "";
+    iframeDoc.body.style.fontFamily = "sans-serif";
+    iframeDoc.body.style.fontSize = "14px";
+    iframeDoc.body.style.lineHeight = "1.5";
+    iframeDoc.body.style.padding = "10px";
+    iframeDoc.body.style.outline = "none";
+    iframeDoc.body.style.height = "100%";
+    
+    // Update the form data when the editor content changes
+    iframeDoc.addEventListener("input", () => {
+      setFormData(prev => ({ ...prev, content: iframeDoc.body.innerHTML }));
+    });
+  };
+
+  // Execute a command on the editor
+  const execCommand = (command: string, showDefaultUI: boolean = false, value?: string) => {
+    if (editorRef) {
+      const iframeDoc = editorRef.contentDocument || editorRef.contentWindow?.document;
+      if (iframeDoc) {
+        // Focus the editor before executing the command
+        editorRef.contentWindow?.focus();
+        
+        // If the command requires a prompt, get the value from the user
+        if (command === 'createLink') {
+          const url = prompt('Digite a URL do link:') || '';
+          if (url) {
+            iframeDoc.execCommand(command, showDefaultUI, url);
+          }
+        } else {
+          // Execute the regular command
+          iframeDoc.execCommand(command, showDefaultUI, value);
+        }
+      }
+    }
   };
 
   const resetForm = () => {
@@ -87,6 +169,13 @@ export const AdminBlog = () => {
       author: "Ana Souza", 
       category: "Técnicas"
     });
+    // If there's an editor open, reset its content too
+    if (editorRef) {
+      const iframeDoc = editorRef.contentDocument || editorRef.contentWindow?.document;
+      if (iframeDoc) {
+        iframeDoc.body.innerHTML = "";
+      }
+    }
   };
 
   const handleAddPost = () => {
@@ -99,6 +188,16 @@ export const AdminBlog = () => {
     setEditingPost(post);
     setIsAddingPost(false);
     setFormData({ ...post });
+    
+    // Update the editor content when editing
+    setTimeout(() => {
+      if (editorRef) {
+        const iframeDoc = editorRef.contentDocument || editorRef.contentWindow?.document;
+        if (iframeDoc) {
+          iframeDoc.body.innerHTML = post.content || "";
+        }
+      }
+    }, 0);
   };
 
   const handleDeletePost = (postId: number) => {
@@ -114,6 +213,15 @@ export const AdminBlog = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Get the latest content from the editor
+    if (editorRef) {
+      const iframeDoc = editorRef.contentDocument || editorRef.contentWindow?.document;
+      if (iframeDoc) {
+        const content = iframeDoc.body.innerHTML;
+        setFormData(prev => ({ ...prev, content }));
+      }
+    }
+
     if (!formData.title || !formData.excerpt || !formData.content || !formData.imageUrl) {
       toast({
         title: "Erro no formulário",
@@ -341,15 +449,38 @@ export const AdminBlog = () => {
                   <label htmlFor="content" className="block text-sm font-medium mb-1">
                     Conteúdo *
                   </label>
-                  <Textarea
-                    id="content"
-                    name="content"
-                    value={formData.content}
-                    onChange={handleInputChange}
-                    required
-                    placeholder="Conteúdo do post (suporta HTML básico)"
-                    className="h-40"
-                  />
+                  
+                  {/* Formatting Toolbar */}
+                  <div className="bg-muted p-2 rounded-t-md border border-b-0 flex flex-wrap gap-1">
+                    {FORMAT_BUTTONS.map((button) => (
+                      <Button
+                        key={button.command}
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 w-8 p-0"
+                        onClick={() => execCommand(button.command, false, button.prompt)}
+                        title={button.tooltip}
+                      >
+                        <button.icon className="h-4 w-4" />
+                        <span className="sr-only">{button.tooltip}</span>
+                      </Button>
+                    ))}
+                  </div>
+                  
+                  {/* Rich Text Editor using iframe */}
+                  <div className="border rounded-b-md overflow-hidden">
+                    <iframe
+                      title="Editor de conteúdo"
+                      className="w-full bg-background"
+                      style={{ height: '300px', border: 'none' }}
+                      ref={(iframe) => {
+                        if (iframe && !editorRef) {
+                          initEditor(iframe);
+                        }
+                      }}
+                    />
+                  </div>
                 </div>
               </div>
             </div>
