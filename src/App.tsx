@@ -17,6 +17,8 @@ import NotFound from "./pages/NotFound";
 import ProductDetail from "./pages/ProductDetail";
 import Admin from "./pages/Admin";
 import Login from "./pages/Login";
+import Blog from "./pages/Blog";
+import BlogPost from "./pages/BlogPost";
 import { useEffect, useState } from "react";
 
 const queryClient = new QueryClient();
@@ -62,6 +64,8 @@ const App = () => {
                 <Route path="/portfolio" element={<Portfolio />} />
                 <Route path="/loja" element={<Store />} />
                 <Route path="/contato" element={<Contact />} />
+                <Route path="/blog" element={<Blog />} />
+                <Route path="/blog/:id" element={<BlogPost />} />
                 <Route path="/produto/:id" element={<ProductDetail />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/admin" element={

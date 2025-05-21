@@ -4,6 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AdminSiteContent } from "@/components/admin/AdminSiteContent";
 import { AdminPortfolio } from "@/components/admin/AdminPortfolio";
 import { AdminProducts } from "@/components/admin/AdminProducts";
+import { AdminBlog } from "@/components/admin/AdminBlog";
 import { useNavigate } from "react-router-dom";
 
 const Admin = () => {
@@ -38,10 +39,11 @@ const Admin = () => {
         </div>
         
         <Tabs defaultValue="content" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="content">Conteúdo do Site</TabsTrigger>
             <TabsTrigger value="portfolio">Portfólio</TabsTrigger>
             <TabsTrigger value="products">Produtos</TabsTrigger>
+            <TabsTrigger value="blog">Blog</TabsTrigger>
           </TabsList>
           <div className="mt-6">
             <TabsContent value="content">
@@ -52,6 +54,9 @@ const Admin = () => {
             </TabsContent>
             <TabsContent value="products">
               <AdminProducts />
+            </TabsContent>
+            <TabsContent value="blog">
+              <AdminBlog />
             </TabsContent>
           </div>
         </Tabs>

@@ -76,20 +76,49 @@ const Home = () => {
         <div className="container-custom">
           <h2 className="section-title text-center mb-12">Loja em Destaque</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[1, 2, 3, 4].map((item) => (
-              <Card key={item} className="overflow-hidden group border border-border/50 hover:border-beige transition-all duration-300">
+            {[
+              {
+                id: 1,
+                name: "Impressão Artística",
+                description: "Impressão Giclée, Série Limitada",
+                price: 200,
+                image: "https://images.unsplash.com/photo-1579783900882-c0d08dad4e67"
+              },
+              {
+                id: 2,
+                name: "Pintura Original",
+                description: "Acrílica sobre tela, Peça única",
+                price: 750,
+                image: "https://images.unsplash.com/photo-1460661382334-790a226d29d7"
+              },
+              {
+                id: 3,
+                name: "Ebook de Arte",
+                description: "Guia digital sobre técnicas mistas",
+                price: 45,
+                image: "https://images.unsplash.com/photo-1544947950-fa07a98d237f"
+              },
+              {
+                id: 4,
+                name: "Escultura Moderna",
+                description: "Cerâmica artesanal exclusiva",
+                price: 350,
+                image: "https://images.unsplash.com/photo-1534349762230-e0caac6a3154"
+              }
+            ].map((product) => (
+              <Card key={product.id} className="overflow-hidden group border border-border/50 hover:border-beige transition-all duration-300">
                 <div className="relative aspect-square overflow-hidden">
                   <img 
-                    src={`https://images.unsplash.com/photo-${item === 1 ? '1579783900882-c0d08dad4e67' : item === 2 ? '1460661382334-790a226d29d7' : item === 3 ? '1579762593392-999e5d2d851d' : '1534349762230-e0caac6a3154'}`} 
-                    alt={`Produto ${item}`}
+                    src={product.image} 
+                    alt={product.name}
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                   <div className="absolute inset-0 bg-foreground/5 group-hover:bg-foreground/0 transition-all duration-300"></div>
                 </div>
                 <CardContent className="pt-4">
-                  <h3 className="font-playfair text-lg text-beige">Produto {item}</h3>
-                  <p className="text-muted-foreground text-sm">Impressão Giclée, Série Limitada</p>
-                  <p className="font-medium mt-2">R$ {(150 + item * 50).toLocaleString('pt-BR')}</p>
+                  <h3 className="font-playfair text-lg text-beige">{product.name}</h3>
+                  <p className="text-muted-foreground text-sm">{product.description}</p>
+                  <p className="font-medium mt-2">R$ {product.price.toLocaleString('pt-BR')}</p>
                 </CardContent>
                 <CardFooter className="pt-0">
                   <Button 
@@ -97,7 +126,7 @@ const Home = () => {
                     className="w-full rounded-full gap-2 bg-beige hover:bg-beige/90 text-foreground font-medium"
                     asChild
                   >
-                    <NavLink to={`/produto/${item}`}>
+                    <NavLink to={`/produto/${product.id}`}>
                       <ShoppingBag className="h-4 w-4" />
                       Comprar
                     </NavLink>
