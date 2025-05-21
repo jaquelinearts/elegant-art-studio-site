@@ -1,13 +1,12 @@
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
-import { Plus, Pencil, X } from "lucide-react";
+import { Plus, Pencil, X, Upload, Image } from "lucide-react";
 
 type Category = "pintura" | "escultura" | "digital" | "instalacao";
 
@@ -48,6 +47,8 @@ export function AdminPortfolio() {
   const [artworks, setArtworks] = useState<ArtWork[]>(initialArtworks);
   const [editingArtwork, setEditingArtwork] = useState<ArtWork | null>(null);
   const [newArtwork, setNewArtwork] = useState(false);
+  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   const emptyArtwork: ArtWork = {
     id: Math.max(0, ...artworks.map(a => a.id)) + 1,
@@ -62,29 +63,38 @@ export function AdminPortfolio() {
   const handleEdit = (artwork: ArtWork) => {
     setEditingArtwork(artwork);
     setNewArtwork(false);
+    setUploadedImage(null);
   };
 
   const handleNew = () => {
     setEditingArtwork(emptyArtwork);
     setNewArtwork(true);
+    setUploadedImage(null);
   };
 
   const handleCancel = () => {
     setEditingArtwork(null);
     setNewArtwork(false);
+    setUploadedImage(null);
   };
 
   const handleSave = () => {
     if (!editingArtwork) return;
     
+    // If we have a newly uploaded image, use that instead of the URL
+    const finalArtwork = {
+      ...editingArtwork,
+      imageUrl: uploadedImage || editingArtwork.imageUrl
+    };
+    
     if (newArtwork) {
-      setArtworks([...artworks, editingArtwork]);
+      setArtworks([...artworks, finalArtwork]);
       toast({
         title: "Obra adicionada",
         description: "A nova obra foi adicionada ao portfólio com sucesso."
       });
     } else {
-      setArtworks(artworks.map(a => a.id === editingArtwork.id ? editingArtwork : a));
+      setArtworks(artworks.map(a => a.id === finalArtwork.id ? finalArtwork : a));
       toast({
         title: "Obra atualizada",
         description: "A obra foi atualizada com sucesso."
@@ -93,6 +103,7 @@ export function AdminPortfolio() {
     
     setEditingArtwork(null);
     setNewArtwork(false);
+    setUploadedImage(null);
   };
 
   const handleDelete = (id: number) => {
@@ -110,6 +121,53 @@ export function AdminPortfolio() {
       ...editingArtwork,
       [field]: value
     });
+  };
+
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Check if file is an image
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: "Erro no upload",
+        description: "Por favor, selecione um arquivo de imagem válido.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Check file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "Arquivo muito grande",
+        description: "A imagem deve ter no máximo 5MB.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const result = e.target?.result;
+      if (typeof result === 'string') {
+        setUploadedImage(result);
+        
+        if (editingArtwork) {
+          // Update the editing artwork with the new image URL
+          setEditingArtwork({
+            ...editingArtwork,
+            imageUrl: result
+          });
+        }
+      }
+    };
+    
+    reader.readAsDataURL(file);
+  };
+
+  const triggerFileInput = () => {
+    fileInputRef.current?.click();
   };
 
   return (
@@ -190,19 +248,37 @@ export function AdminPortfolio() {
               
               <div>
                 <Label htmlFor="imageUrl">URL da Imagem</Label>
-                <Input 
-                  id="imageUrl" 
-                  value={editingArtwork.imageUrl} 
-                  onChange={(e) => handleChange("imageUrl", e.target.value)}
-                />
+                <div className="flex gap-2">
+                  <Input 
+                    id="imageUrl" 
+                    value={editingArtwork.imageUrl} 
+                    onChange={(e) => handleChange("imageUrl", e.target.value)}
+                    className="flex-1"
+                  />
+                  <Button 
+                    type="button" 
+                    variant="outline"
+                    onClick={triggerFileInput}
+                    className="flex-shrink-0"
+                  >
+                    <Upload className="w-4 h-4 mr-2" /> Upload
+                  </Button>
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleImageUpload}
+                    accept="image/*"
+                    className="hidden"
+                  />
+                </div>
               </div>
               
               <div className="mt-4">
                 <Label>Pré-visualização da Imagem</Label>
                 <div className="mt-2 aspect-square border rounded overflow-hidden">
-                  {editingArtwork.imageUrl ? (
+                  {(uploadedImage || editingArtwork.imageUrl) ? (
                     <img 
-                      src={editingArtwork.imageUrl} 
+                      src={uploadedImage || editingArtwork.imageUrl} 
                       alt="Pré-visualização" 
                       className="w-full h-full object-cover"
                     />
@@ -223,7 +299,7 @@ export function AdminPortfolio() {
             <Button 
               onClick={handleSave}
               className="bg-beige hover:bg-beige/90 text-foreground"
-              disabled={!editingArtwork.title || !editingArtwork.imageUrl}
+              disabled={!editingArtwork.title || !(uploadedImage || editingArtwork.imageUrl)}
             >
               Salvar
             </Button>
