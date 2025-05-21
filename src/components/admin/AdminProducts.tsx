@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -7,9 +7,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "@/hooks/use-toast";
-import { Plus, Pencil, X } from "lucide-react";
+import { Plus, Pencil, X, Upload, Trash } from "lucide-react";
 
-type ProductCategory = "pintura" | "gravura" | "impressao" | "objeto";
+type ProductCategory = "pintura" | "gravura" | "impressao" | "objeto" | "ebook";
 
 type Product = {
   id: number;
@@ -48,6 +48,8 @@ export function AdminProducts() {
   const [products, setProducts] = useState<Product[]>(initialProducts);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [newProduct, setNewProduct] = useState(false);
+  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   const emptyProduct: Product = {
     id: Math.max(0, ...products.map(p => p.id)) + 1,
@@ -112,6 +114,73 @@ export function AdminProducts() {
     });
   };
 
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Check if file is an image
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: "Erro no upload",
+        description: "Por favor, selecione um arquivo de imagem válido.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Check file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "Arquivo muito grande",
+        description: "A imagem deve ter no máximo 5MB.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const result = e.target?.result;
+      if (typeof result === 'string') {
+        setUploadedImage(result);
+        
+        if (editingProduct) {
+          // Update the editing product with the new image URL
+          setEditingProduct({
+            ...editingProduct,
+            imageUrl: result
+          });
+        }
+      }
+    };
+    
+    reader.readAsDataURL(file);
+  };
+
+  const triggerFileInput = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleDeleteImage = () => {
+    if (editingProduct) {
+      setEditingProduct({
+        ...editingProduct,
+        imageUrl: ""
+      });
+      setUploadedImage(null);
+      
+      // Reset the file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+
+      toast({
+        title: "Imagem removida",
+        description: "A imagem foi removida com sucesso."
+      });
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -167,6 +236,7 @@ export function AdminProducts() {
                     <SelectItem value="gravura">Gravuras</SelectItem>
                     <SelectItem value="impressao">Impressões</SelectItem>
                     <SelectItem value="objeto">Objetos</SelectItem>
+                    <SelectItem value="ebook">eBooks</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -194,22 +264,51 @@ export function AdminProducts() {
               
               <div>
                 <Label htmlFor="imageUrl">URL da Imagem</Label>
-                <Input 
-                  id="imageUrl" 
-                  value={editingProduct.imageUrl} 
-                  onChange={(e) => handleChange("imageUrl", e.target.value)}
-                />
+                <div className="flex gap-2">
+                  <Input 
+                    id="imageUrl" 
+                    value={editingProduct.imageUrl} 
+                    onChange={(e) => handleChange("imageUrl", e.target.value)}
+                    className="flex-1"
+                  />
+                  <Button 
+                    type="button" 
+                    variant="outline"
+                    onClick={triggerFileInput}
+                    className="flex-shrink-0"
+                  >
+                    <Upload className="w-4 h-4 mr-2" /> Upload
+                  </Button>
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleImageUpload}
+                    accept="image/*"
+                    className="hidden"
+                  />
+                </div>
               </div>
               
               <div className="mt-4">
                 <Label>Pré-visualização da Imagem</Label>
-                <div className="mt-2 aspect-square border rounded overflow-hidden">
-                  {editingProduct.imageUrl ? (
-                    <img 
-                      src={editingProduct.imageUrl} 
-                      alt="Pré-visualização" 
-                      className="w-full h-full object-cover"
-                    />
+                <div className="mt-2 aspect-square border rounded overflow-hidden relative">
+                  {(uploadedImage || editingProduct.imageUrl) ? (
+                    <>
+                      <img 
+                        src={uploadedImage || editingProduct.imageUrl} 
+                        alt="Pré-visualização" 
+                        className="w-full h-full object-cover"
+                      />
+                      <Button 
+                        type="button"
+                        variant="destructive"
+                        size="sm"
+                        className="absolute top-2 right-2"
+                        onClick={handleDeleteImage}
+                      >
+                        <Trash className="w-4 h-4 mr-2" /> Excluir
+                      </Button>
+                    </>
                   ) : (
                     <div className="w-full h-full flex items-center justify-center bg-muted">
                       <span className="text-muted-foreground">Sem imagem</span>

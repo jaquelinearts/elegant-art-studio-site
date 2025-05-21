@@ -1,4 +1,3 @@
-
 import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
-import { Plus, Pencil, X, Upload, Image } from "lucide-react";
+import { Plus, Pencil, X, Upload, Trash } from "lucide-react";
 
 type Category = "pintura" | "escultura" | "digital" | "instalacao";
 
@@ -112,6 +111,26 @@ export function AdminPortfolio() {
       title: "Obra removida",
       description: "A obra foi removida do portfólio."
     });
+  };
+
+  const handleDeleteImage = () => {
+    if (editingArtwork) {
+      setEditingArtwork({
+        ...editingArtwork,
+        imageUrl: ""
+      });
+      setUploadedImage(null);
+      
+      // Reset the file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+
+      toast({
+        title: "Imagem removida",
+        description: "A imagem foi removida com sucesso."
+      });
+    }
   };
 
   const handleChange = (field: keyof ArtWork, value: string) => {
@@ -275,13 +294,24 @@ export function AdminPortfolio() {
               
               <div className="mt-4">
                 <Label>Pré-visualização da Imagem</Label>
-                <div className="mt-2 aspect-square border rounded overflow-hidden">
+                <div className="mt-2 aspect-square border rounded overflow-hidden relative">
                   {(uploadedImage || editingArtwork.imageUrl) ? (
-                    <img 
-                      src={uploadedImage || editingArtwork.imageUrl} 
-                      alt="Pré-visualização" 
-                      className="w-full h-full object-cover"
-                    />
+                    <>
+                      <img 
+                        src={uploadedImage || editingArtwork.imageUrl} 
+                        alt="Pré-visualização" 
+                        className="w-full h-full object-cover"
+                      />
+                      <Button 
+                        type="button"
+                        variant="destructive"
+                        size="sm"
+                        className="absolute top-2 right-2"
+                        onClick={handleDeleteImage}
+                      >
+                        <Trash className="w-4 h-4 mr-2" /> Excluir
+                      </Button>
+                    </>
                   ) : (
                     <div className="w-full h-full flex items-center justify-center bg-muted">
                       <span className="text-muted-foreground">Sem imagem</span>
