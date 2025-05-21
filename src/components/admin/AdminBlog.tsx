@@ -16,7 +16,7 @@ import {
   AlignCenter, 
   AlignRight,
   ListOrdered,
-  ListUnordered,
+  List,
   Link,
   Unlink
 } from "lucide-react";
@@ -80,7 +80,7 @@ const FORMAT_BUTTONS = [
   { icon: AlignCenter, command: 'justifyCenter', tooltip: 'Centralizar' },
   { icon: AlignRight, command: 'justifyRight', tooltip: 'Alinhar à direita' },
   { icon: ListOrdered, command: 'insertOrderedList', tooltip: 'Lista numerada' },
-  { icon: ListUnordered, command: 'insertUnorderedList', tooltip: 'Lista com marcadores' },
+  { icon: List, command: 'insertUnorderedList', tooltip: 'Lista com marcadores' },
   { icon: Link, command: 'createLink', tooltip: 'Inserir link', prompt: 'Digite a URL:' },
   { icon: Unlink, command: 'unlink', tooltip: 'Remover link' },
 ];
