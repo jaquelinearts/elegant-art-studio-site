@@ -3,14 +3,16 @@ import { NavLink } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/shared/ThemeToggle";
+import { LanguageToggle } from "@/components/shared/LanguageToggle";
 import { cn } from "@/lib/utils";
 
 const NavItems = [
-  { name: "Home", path: "/" },
-  { name: "Sobre Mim", path: "/sobre-mim" },
+  { name: "Jaqueline", path: "/" },
   { name: "Portfólio", path: "/portfolio" },
   { name: "Loja", path: "/loja" },
-  { name: "Contato", path: "/contato" },
+  { name: "Contato & Encomenda", path: "/contato" },
+  { name: "Blog", path: "/blog" },
+  { name: "Seja um Apoiador", path: "/apoiador" },
 ];
 
 export function Navbar() {
@@ -24,8 +26,8 @@ export function Navbar() {
     <header className="fixed top-0 left-0 right-0 z-40 bg-background/80 backdrop-blur-md border-b transition-all duration-300">
       <div className="container-custom py-4 flex items-center justify-between">
         <div className="flex items-center">
-          <NavLink to="/" className="font-playfair font-bold text-2xl text-beige">
-            ARTE
+          <NavLink to="/" className="font-playfair font-bold text-2xl" style={{ color: "#5B431B" }}>
+            Jaqueline FineArt
           </NavLink>
         </div>
 
@@ -45,11 +47,13 @@ export function Navbar() {
               {item.name}
             </NavLink>
           ))}
+          <LanguageToggle />
           <ThemeToggle />
         </nav>
 
         {/* Mobile Navigation Trigger */}
         <div className="flex items-center md:hidden">
+          <LanguageToggle />
           <ThemeToggle />
           <Button
             variant="ghost"

@@ -1,4 +1,3 @@
-
 import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,7 +8,7 @@ import { Switch } from "@/components/ui/switch";
 import { toast } from "@/hooks/use-toast";
 import { Plus, Pencil, X, Upload, Trash } from "lucide-react";
 
-type ProductCategory = "pintura" | "gravura" | "impressao" | "objeto" | "ebook";
+type ProductCategory = "pintura-exclusiva" | "arte-digital" | "fotografia" | "ebook" | "encomendas";
 
 type Product = {
   id: number;
@@ -19,6 +18,7 @@ type Product = {
   category: ProductCategory;
   available: boolean;
   description: string;
+  additionalImages?: string[]; // Campo para imagens adicionais
 };
 
 // Dados de exemplo dos produtos
@@ -28,7 +28,7 @@ const initialProducts: Product[] = [
     title: "Horizonte Abstrato",
     price: 1200,
     imageUrl: "https://images.unsplash.com/photo-1513836279014-a89f7a76ae86",
-    category: "pintura",
+    category: "pintura-exclusiva",
     available: true,
     description: "Pintura abstrata em acrílica sobre tela, com tons azuis e dourados."
   },
@@ -37,9 +37,9 @@ const initialProducts: Product[] = [
     title: "Série Natureza #3",
     price: 850,
     imageUrl: "https://images.unsplash.com/photo-1513836279014-a89f7a76ae86",
-    category: "gravura",
+    category: "arte-digital",
     available: true,
-    description: "Gravura em metal, impressa em papel de algodão. Edição limitada de 25 exemplares."
+    description: "Arte digital em alta resolução, impressa em papel de algodão. Edição limitada de 25 exemplares."
   },
   // ... outros produtos seriam carregados do banco de dados
 ];
@@ -49,14 +49,17 @@ export function AdminProducts() {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [newProduct, setNewProduct] = useState(false);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+  const [additionalImages, setAdditionalImages] = useState<string[]>([]);
+  const [uploadingAdditional, setUploadingAdditional] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const additionalFileInputRef = useRef<HTMLInputElement>(null);
   
   const emptyProduct: Product = {
     id: Math.max(0, ...products.map(p => p.id)) + 1,
     title: "",
     price: 0,
     imageUrl: "",
-    category: "pintura",
+    category: "pintura-exclusiva",
     available: true,
     description: ""
   };
@@ -64,29 +67,37 @@ export function AdminProducts() {
   const handleEdit = (product: Product) => {
     setEditingProduct(product);
     setNewProduct(false);
+    setAdditionalImages(product.additionalImages || []);
   };
 
   const handleNew = () => {
     setEditingProduct(emptyProduct);
     setNewProduct(true);
+    setAdditionalImages([]);
   };
 
   const handleCancel = () => {
     setEditingProduct(null);
     setNewProduct(false);
+    setAdditionalImages([]);
   };
 
   const handleSave = () => {
     if (!editingProduct) return;
     
+    const finalProduct = {
+      ...editingProduct,
+      additionalImages: additionalImages.length > 0 ? additionalImages : undefined
+    };
+    
     if (newProduct) {
-      setProducts([...products, editingProduct]);
+      setProducts([...products, finalProduct]);
       toast({
         title: "Produto adicionado",
         description: "O novo produto foi adicionado à loja com sucesso."
       });
     } else {
-      setProducts(products.map(p => p.id === editingProduct.id ? editingProduct : p));
+      setProducts(products.map(p => p.id === finalProduct.id ? finalProduct : p));
       toast({
         title: "Produto atualizado",
         description: "O produto foi atualizado com sucesso."
@@ -95,6 +106,7 @@ export function AdminProducts() {
     
     setEditingProduct(null);
     setNewProduct(false);
+    setAdditionalImages([]);
   };
 
   const handleDelete = (id: number) => {
@@ -107,6 +119,10 @@ export function AdminProducts() {
 
   const handleChange = (field: keyof Product, value: any) => {
     if (!editingProduct) return;
+    
+    if (field === "imageUrl") {
+      setUploadedImage(null); // Limpa a imagem carregada quando uma URL é inserida
+    }
     
     setEditingProduct({
       ...editingProduct,
@@ -128,27 +144,42 @@ export function AdminProducts() {
       return;
     }
 
-    // Check file size (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
+    // Check file size (max 10MB)
+    if (file.size > 10 * 1024 * 1024) {
       toast({
         title: "Arquivo muito grande",
-        description: "A imagem deve ter no máximo 5MB.",
+        description: "A imagem deve ter no máximo 10MB.",
         variant: "destructive"
       });
       return;
     }
+
+    // Mostrar feedback ao usuário
+    toast({
+      title: "Processando imagem",
+      description: "Aguarde enquanto a imagem está sendo processada..."
+    });
 
     const reader = new FileReader();
     reader.onload = (e) => {
       const result = e.target?.result;
       if (typeof result === 'string') {
         setUploadedImage(result);
-        
         if (editingProduct) {
-          // Update the editing product with the new image URL
           setEditingProduct({
             ...editingProduct,
-            imageUrl: result
+            imageUrl: "" // Limpa a URL quando uma imagem é carregada
+          });
+
+          // Limpar o campo de URL
+          const urlInput = document.getElementById('imageUrl') as HTMLInputElement;
+          if (urlInput) {
+            urlInput.value = '';
+          }
+
+          toast({
+            title: "Imagem carregada",
+            description: "A imagem foi carregada com sucesso."
           });
         }
       }
@@ -156,6 +187,8 @@ export function AdminProducts() {
     
     reader.readAsDataURL(file);
   };
+
+    // Funções de crop removidas pois não são mais necessárias
 
   const triggerFileInput = () => {
     fileInputRef.current?.click();
@@ -179,6 +212,93 @@ export function AdminProducts() {
         description: "A imagem foi removida com sucesso."
       });
     }
+  };
+
+  const triggerAdditionalFileInput = () => {
+    additionalFileInputRef.current?.click();
+  };
+  
+  const handleAdditionalImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (!files || files.length === 0) return;
+
+    // Verificar se não ultrapassará o limite de 5 imagens
+    if (additionalImages.length + files.length > 5) {
+      toast({
+        title: "Limite de imagens",
+        description: "Você pode adicionar no máximo 5 imagens adicionais.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setUploadingAdditional(true);
+    
+    // Array para armazenar as promessas de leitura dos arquivos
+    const fileReadPromises: Promise<string>[] = [];
+    
+    // Para cada arquivo selecionado
+    Array.from(files).forEach(file => {
+      // Check if file is an image
+      if (!file.type.startsWith('image/')) {
+        toast({
+          title: "Erro no upload",
+          description: "Por favor, selecione apenas arquivos de imagem válidos.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Check file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        toast({
+          title: "Arquivo muito grande",
+          description: "Cada imagem deve ter no máximo 5MB.",
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      // Criar uma promessa para ler o arquivo
+      const filePromise = new Promise<string>((resolve) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const result = e.target?.result;
+          if (typeof result === 'string') {
+            resolve(result);
+          }
+        };
+        reader.readAsDataURL(file);
+      });
+      
+      fileReadPromises.push(filePromise);
+    });
+    
+    // Quando todas as leituras forem concluídas
+    Promise.all(fileReadPromises).then(results => {
+      setAdditionalImages(prev => [...prev, ...results]);
+      
+      // Reset the file input
+      if (additionalFileInputRef.current) {
+        additionalFileInputRef.current.value = "";
+      }
+      
+      toast({
+        title: "Imagens adicionais carregadas",
+        description: `${results.length} imagem(ns) adicional(is) foi(foram) carregada(s) com sucesso.`
+      });
+      
+      setUploadingAdditional(false);
+    });
+  };
+  
+  const handleRemoveAdditionalImage = (index: number) => {
+    setAdditionalImages(prev => prev.filter((_, i) => i !== index));
+    
+    toast({
+      title: "Imagem adicional removida",
+      description: "A imagem adicional foi removida com sucesso."
+    });
   };
 
   return (
@@ -232,11 +352,11 @@ export function AdminProducts() {
                     <SelectValue placeholder="Selecione a categoria" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="pintura">Pinturas</SelectItem>
-                    <SelectItem value="gravura">Gravuras</SelectItem>
-                    <SelectItem value="impressao">Impressões</SelectItem>
-                    <SelectItem value="objeto">Objetos</SelectItem>
-                    <SelectItem value="ebook">eBooks</SelectItem>
+                    <SelectItem value="pintura-exclusiva">Pintura Exclusiva</SelectItem>
+                    <SelectItem value="arte-digital">Arte Digital</SelectItem>
+                    <SelectItem value="fotografia">Fotografia</SelectItem>
+                    <SelectItem value="ebook">Ebook</SelectItem>
+                    <SelectItem value="encomendas">Encomendas</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -291,30 +411,142 @@ export function AdminProducts() {
               
               <div className="mt-4">
                 <Label>Pré-visualização da Imagem</Label>
-                <div className="mt-2 aspect-square border rounded overflow-hidden relative">
-                  {(uploadedImage || editingProduct.imageUrl) ? (
+                <div 
+                  className={`mt-2 border-2 ${!uploadedImage && !editingProduct?.imageUrl ? 'border-dashed' : 'border-solid'} rounded bg-background relative transition-all duration-200`}
+                  onDragOver={(e) => {
+                    // Só permitir drag over se não houver imagem
+                    if (!uploadedImage && !editingProduct?.imageUrl) {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      e.currentTarget.classList.add('border-beige', 'bg-beige/5');
+                    }
+                  }}
+                  onDragLeave={(e) => {
+                    // Só processar se não houver imagem
+                    if (!uploadedImage && !editingProduct?.imageUrl) {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      e.currentTarget.classList.remove('border-beige', 'bg-beige/5');
+                    }
+                  }}
+                  onDrop={(e) => {
+                    // Só permitir drop se não houver imagem
+                    if (!uploadedImage && !editingProduct?.imageUrl) {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      e.currentTarget.classList.remove('border-beige', 'bg-beige/5');
+                      
+                      const file = e.dataTransfer.files[0];
+                      if (file && file.type.startsWith('image/')) {
+                        // Simular o upload como se fosse pelo input
+                        const dataTransfer = new DataTransfer();
+                        dataTransfer.items.add(file);
+                        if (fileInputRef.current) {
+                          fileInputRef.current.files = dataTransfer.files;
+                          handleImageUpload({ target: { files: dataTransfer.files } } as any);
+                        }
+                      } else {
+                        toast({
+                          title: "Arquivo inválido",
+                          description: "Por favor, arraste apenas arquivos de imagem.",
+                          variant: "destructive"
+                        });
+                      }
+                    } else {
+                      e.preventDefault();
+                      e.stopPropagation();
+                    }
+                  }}
+                >
+                  {(uploadedImage || editingProduct?.imageUrl) ? (
                     <>
-                      <img 
-                        src={uploadedImage || editingProduct.imageUrl} 
-                        alt="Pré-visualização" 
-                        className="w-full h-full object-cover"
-                      />
-                      <Button 
-                        type="button"
-                        variant="destructive"
-                        size="sm"
-                        className="absolute top-2 right-2"
-                        onClick={handleDeleteImage}
-                      >
-                        <Trash className="w-4 h-4 mr-2" /> Excluir
-                      </Button>
+                      <div className="p-4 flex items-center justify-center">
+                        <img 
+                          src={uploadedImage || editingProduct?.imageUrl} 
+                          alt="Pré-visualização" 
+                          className="w-auto h-auto"
+                          style={{ maxWidth: '100%', maxHeight: '600px', objectFit: 'contain' }}
+                        />
+                      </div>
+                      <div className="absolute top-2 right-2">
+                        <Button 
+                          type="button"
+                          variant="destructive"
+                          size="sm"
+                          onClick={handleDeleteImage}
+                        >
+                          <Trash className="w-4 h-4" />
+                        </Button>
+                      </div>
                     </>
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-muted">
-                      <span className="text-muted-foreground">Sem imagem</span>
+                    <div 
+                      className="flex flex-col items-center justify-center py-16 text-muted-foreground cursor-pointer hover:bg-accent/10 transition-colors"
+                      onClick={triggerFileInput}
+                    >
+                      <Upload className="w-8 h-8 mb-2 opacity-50" />
+                      <span className="text-center px-4">Arraste uma imagem ou clique para selecionar</span>
                     </div>
                   )}
                 </div>
+                <p className="text-sm text-muted-foreground mt-2">
+                  Tamanho recomendado: 1000x1000 pixels (proporção 1:1)
+                </p>
+              </div>
+              
+              {/* Imagens adicionais */}
+              <div className="mt-4">
+                <div className="flex justify-between items-center mb-2">
+                  <Label>Imagens Adicionais ({additionalImages.length}/5)</Label>
+                  <Button 
+                    type="button" 
+                    variant="outline"
+                    size="sm"
+                    onClick={triggerAdditionalFileInput}
+                    disabled={uploadingAdditional || additionalImages.length >= 5}
+                  >
+                    <Upload className="w-4 h-4 mr-2" /> Adicionar
+                  </Button>
+                  <input
+                    type="file"
+                    ref={additionalFileInputRef}
+                    onChange={handleAdditionalImageUpload}
+                    accept="image/*"
+                    className="hidden"
+                    multiple
+                  />
+                </div>
+                
+                {additionalImages.length > 0 ? (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                    {additionalImages.map((img, index) => (
+                      <div key={index} className="border rounded overflow-hidden relative">
+                        <div className="aspect-square">
+                          <img 
+                            src={img} 
+                            alt={`Imagem adicional ${index + 1}`} 
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                        <div className="absolute top-2 right-2 bg-white/70 rounded-full">
+                          <Button 
+                            type="button"
+                            variant="destructive"
+                            size="icon"
+                            className="h-6 w-6 p-0"
+                            onClick={() => handleRemoveAdditionalImage(index)}
+                          >
+                            <X className="w-3 h-3" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="border rounded p-4 text-center text-muted-foreground">
+                    Nenhuma imagem adicional
+                  </div>
+                )}
               </div>
             </div>
           </div>

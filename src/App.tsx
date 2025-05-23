@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -19,6 +18,7 @@ import Admin from "./pages/Admin";
 import Login from "./pages/Login";
 import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
+import Apoiador from "./pages/Apoiador";
 import { useEffect, useState } from "react";
 
 const queryClient = new QueryClient();
@@ -57,9 +57,9 @@ const App = () => {
         <BrowserRouter>
           <div className="flex flex-col min-h-screen">
             <Navbar />
-            <main className="flex-grow pt-20">
+            <main className="flex-grow pt-20 main-content">
               <Routes>
-                <Route path="/" element={<Home />} />
+                <Route path="/" element={<About />} />
                 <Route path="/sobre-mim" element={<About />} />
                 <Route path="/portfolio" element={<Portfolio />} />
                 <Route path="/loja" element={<Store />} />
@@ -67,6 +67,7 @@ const App = () => {
                 <Route path="/blog" element={<Blog />} />
                 <Route path="/blog/:id" element={<BlogPost />} />
                 <Route path="/produto/:id" element={<ProductDetail />} />
+                <Route path="/apoiador" element={<Apoiador />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/admin" element={
                   <ProtectedRoute>
