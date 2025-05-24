@@ -1,9 +1,8 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-type Category = "all" | "pintura" | "escultura" | "digital" | "instalacao";
+type Category = "all" | "pintura" | "escultura" | "digital" | "instalacao" | "fotografia" | "desenhos" | "pintura_tela" | "pintura_papel" | "arquivos";
 
 type ArtWork = {
   id: number;
@@ -103,9 +102,35 @@ const Portfolio = () => {
   const [selectedCategory, setSelectedCategory] = useState<Category>("all");
   const [filteredArtworks, setFilteredArtworks] = useState<ArtWork[]>(artworks);
   const [selectedArtwork, setSelectedArtwork] = useState<ArtWork | null>(null);
+  const [categoryDescriptions, setCategoryDescriptions] = useState<Record<Category, string>>({
+    all: "Explore meu portfólio completo, uma coleção diversificada que reflete minha jornada artística através de diferentes meios e técnicas.",
+    pintura: "Minhas pinturas exploram a interação entre cor, forma e emoção, criando narrativas visuais que convidam à contemplação e reflexão.",
+    escultura: "Através da escultura, transformo materiais em formas tridimensionais que dialogam com o espaço e desafiam percepções.",
+    digital: "Minha arte digital combina tecnologia e criatividade, explorando as possibilidades ilimitadas do meio digital para criar experiências visuais inovadoras.",
+    instalacao: "Minhas instalações são experiências imersivas que transformam espaços e convidam o espectador a fazer parte da obra.",
+    fotografia: "Através da fotografia, capturo momentos e perspectivas únicas, revelando beleza em detalhes muitas vezes despercebidos.",
+    desenhos: "Através do desenho, exploro a essência da forma e da linha, desde estudos detalhados até expressões mais livres e espontâneas.",
+    pintura_tela: "Minhas pinturas em tela exploram texturas e camadas, criando profundidade e dimensão através de técnicas tradicionais e experimentais.",
+    pintura_papel: "A delicadeza do papel como suporte permite uma fluidez única nas minhas pinturas, explorando a transparência e leveza das cores.",
+    arquivos: "Uma seleção de obras históricas do meu acervo pessoal, representando diferentes fases e experimentações ao longo da minha trajetória artística."
+  });
 
   useEffect(() => {
     window.scrollTo(0, 0);
+    
+    // Carregar descrições das categorias do localStorage
+    const savedDescriptions = localStorage.getItem('categoryDescriptions');
+    if (savedDescriptions) {
+      try {
+        const parsedData = JSON.parse(savedDescriptions);
+        setCategoryDescriptions(prev => ({
+          ...prev,
+          ...parsedData
+        }));
+      } catch (error) {
+        console.error("Erro ao carregar descrições das categorias:", error);
+      }
+    }
   }, []);
 
   useEffect(() => {
@@ -116,13 +141,21 @@ const Portfolio = () => {
     }
   }, [selectedCategory]);
 
+  // Obter categorias que possuem obras
+  const categoriesWithArtworks = ["all", ...Array.from(new Set(artworks.map(artwork => artwork.category)))];
+  
   const categories: { value: Category; label: string }[] = [
     { value: "all", label: "Todos" },
     { value: "pintura", label: "Pintura" },
+    { value: "pintura_tela", label: "Pintura em Tela" },
+    { value: "pintura_papel", label: "Pintura em Papel" },
     { value: "escultura", label: "Escultura" },
     { value: "digital", label: "Arte Digital" },
     { value: "instalacao", label: "Instalação" },
-  ];
+    { value: "fotografia", label: "Fotografia" },
+    { value: "desenhos", label: "Desenhos" },
+    { value: "arquivos", label: "Obras de Arquivos" },
+  ].filter(category => category.value === "all" || categoriesWithArtworks.includes(category.value));
 
   return (
     <div className="py-16">
@@ -130,12 +163,12 @@ const Portfolio = () => {
         <h1 className="section-title text-center mb-16">Portfólio</h1>
         
         {/* Filter Buttons */}
-        <div className="flex flex-wrap justify-center gap-2 md:gap-4 mb-12">
+        <div className="flex flex-wrap justify-center gap-2 md:gap-3 mb-8 max-w-4xl mx-auto">
           {categories.map((category) => (
             <Button
               key={category.value}
               variant={selectedCategory === category.value ? "default" : "outline"}
-              className="rounded-full"
+              className="rounded-full text-sm md:text-base px-3 py-1 h-auto mb-2"
               onClick={() => setSelectedCategory(category.value)}
             >
               {category.label}
@@ -143,12 +176,19 @@ const Portfolio = () => {
           ))}
         </div>
         
+        {/* Category Description */}
+        <div className="mb-12 text-center max-w-3xl mx-auto">
+          <p className="text-lg italic text-muted-foreground transition-opacity duration-300 ease-in-out">
+            {categoryDescriptions[selectedCategory]}
+          </p>
+        </div>
+        
         {/* Gallery Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 transition-all duration-300 ease-in-out">
           {filteredArtworks.map((artwork) => (
             <div 
               key={artwork.id} 
-              className="group cursor-pointer"
+              className="group cursor-pointer transition-all duration-300 ease-in-out hover:translate-y-[-5px]"
               onClick={() => setSelectedArtwork(artwork)}
             >
               <div className="relative aspect-square overflow-hidden rounded-lg mb-4">

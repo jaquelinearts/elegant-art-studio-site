@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "@/hooks/use-toast";
 import { Plus, Pencil, X, Upload, Trash } from "lucide-react";
 
-type Category = "pintura-tela" | "pintura-papel" | "desenhos" | "obras-arquivo";
+type Category = "pintura" | "pintura_tela" | "pintura_papel" | "escultura" | "digital" | "instalacao" | "fotografia" | "desenhos" | "arquivos";
 
 type ArtWork = {
   id: number;
@@ -25,7 +25,7 @@ const initialArtworks: ArtWork[] = [
   {
     id: 1,
     title: "Fragmentos do Tempo",
-    category: "pintura-tela",
+    category: "pintura_tela",
     year: "2023",
     imageUrl: "https://images.unsplash.com/photo-1500375592092-40eb2168fd21",
     dimensions: "120 x 90 cm",
@@ -38,7 +38,7 @@ const initialArtworks: ArtWork[] = [
   {
     id: 2,
     title: "Memória Coletiva",
-    category: "pintura-tela",
+    category: "pintura_tela",
     year: "2022",
     imageUrl: "https://images.unsplash.com/photo-1458668383970-8ddd3927deed",
     dimensions: "100 x 150 cm",
@@ -60,7 +60,7 @@ export function AdminPortfolio() {
   const emptyArtwork: ArtWork = {
     id: Math.max(0, ...artworks.map(a => a.id)) + 1,
     title: "",
-    category: "pintura-tela",
+    category: "pintura_tela",
     year: new Date().getFullYear().toString(),
     imageUrl: "",
     dimensions: "",
@@ -348,10 +348,15 @@ export function AdminPortfolio() {
                     <SelectValue placeholder="Selecione a categoria" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="pintura-tela">Pintura em tela</SelectItem>
-                    <SelectItem value="pintura-papel">Pintura em papel</SelectItem>
+                    <SelectItem value="pintura">Pintura</SelectItem>
+                    <SelectItem value="pintura_tela">Pintura em Tela</SelectItem>
+                    <SelectItem value="pintura_papel">Pintura em Papel</SelectItem>
+                    <SelectItem value="escultura">Escultura</SelectItem>
+                    <SelectItem value="digital">Arte Digital</SelectItem>
+                    <SelectItem value="instalacao">Instalação</SelectItem>
+                    <SelectItem value="fotografia">Fotografia</SelectItem>
                     <SelectItem value="desenhos">Desenhos</SelectItem>
-                    <SelectItem value="obras-arquivo">Obras de Arquivos</SelectItem>
+                    <SelectItem value="arquivos">Obras de Arquivos</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

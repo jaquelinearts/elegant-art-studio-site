@@ -24,10 +24,10 @@ export function Navbar() {
 
   return (
     <header className="fixed top-0 left-0 right-0 z-40 bg-background/80 backdrop-blur-md border-b transition-all duration-300">
-      <div className="container-custom py-4 flex items-center justify-between">
+      <div className="container-custom py-2 flex items-center justify-between">
         <div className="flex items-center">
-          <NavLink to="/" className="font-playfair font-bold text-2xl" style={{ color: "#5B431B" }}>
-            Jaqueline FineArt
+          <NavLink to="/" className="flex items-center">
+            <img src="/logojacky.png" alt="Jaqueline FineArt" className="h-16 max-h-[64px] w-auto" />
           </NavLink>
         </div>
 
@@ -67,31 +67,32 @@ export function Navbar() {
       </div>
 
       {/* Mobile Menu */}
-      <div
-        className={cn(
-          "fixed inset-0 z-50 bg-background flex flex-col md:hidden pt-24 px-6",
-          isMenuOpen ? "translate-y-0" : "-translate-y-full",
-          "transition-transform duration-300 ease-in-out"
-        )}
-      >
-        <nav className="flex flex-col space-y-6 items-center">
-          {NavItems.map((item) => (
-            <NavLink
-              key={item.path}
-              to={item.path}
-              onClick={() => setIsMenuOpen(false)}
-              className={({ isActive }) =>
-                cn(
-                  "text-lg uppercase tracking-wider transition-colors",
-                  isActive ? "font-medium text-beige" : "font-normal"
-                )
-              }
-            >
-              {item.name}
-            </NavLink>
-          ))}
-        </nav>
-      </div>
+      {isMenuOpen && (
+        <div
+          className={cn(
+            "fixed inset-0 top-[72px] z-50 bg-background flex flex-col md:hidden px-6 h-screen",
+            "transition-all duration-300 ease-in-out"
+          )}
+        >
+          <nav className="flex flex-col space-y-6 items-center pt-10">
+            {NavItems.map((item) => (
+              <NavLink
+                key={item.path}
+                to={item.path}
+                onClick={() => setIsMenuOpen(false)}
+                className={({ isActive }) =>
+                  cn(
+                    "text-lg uppercase tracking-wider transition-colors",
+                    isActive ? "font-medium text-beige" : "font-normal"
+                  )
+                }
+              >
+                {item.name}
+              </NavLink>
+            ))}
+          </nav>
+        </div>
+      )}
     </header>
   );
 }

@@ -8,6 +8,9 @@ import { toast } from "@/hooks/use-toast";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
 
+// Definir o tipo Category igual ao do Portfolio.tsx
+type Category = "all" | "pintura" | "escultura" | "digital" | "instalacao" | "fotografia" | "desenhos" | "pintura_tela" | "pintura_papel" | "arquivos";
+
 export function AdminSiteContent() {
   const [heroTitle, setHeroTitle] = useState("Hello");
   const [heroSubtitle, setHeroSubtitle] = useState(
@@ -47,6 +50,20 @@ export function AdminSiteContent() {
     youtube: true
   });
 
+  // Category descriptions state
+  const [categoryDescriptions, setCategoryDescriptions] = useState<Record<Category, string>>({
+    all: "Explore meu portfólio completo, uma coleção diversificada que reflete minha jornada artística através de diferentes meios e técnicas.",
+    pintura: "Minhas pinturas exploram a interação entre cor, forma e emoção, criando narrativas visuais que convidam à contemplação e reflexão.",
+    escultura: "Através da escultura, transformo materiais em formas tridimensionais que dialogam com o espaço e desafiam percepções.",
+    digital: "Minha arte digital combina tecnologia e criatividade, explorando as possibilidades ilimitadas do meio digital para criar experiências visuais inovadoras.",
+    instalacao: "Minhas instalações são experiências imersivas que transformam espaços e convidam o espectador a fazer parte da obra.",
+    fotografia: "Através da fotografia, capturo momentos e perspectivas únicas, revelando beleza em detalhes muitas vezes despercebidos.",
+    desenhos: "Através do desenho, exploro a essência da forma e da linha, desde estudos detalhados até expressões mais livres e espontâneas.",
+    pintura_tela: "Minhas pinturas em tela exploram texturas e camadas, criando profundidade e dimensão através de técnicas tradicionais e experimentais.",
+    pintura_papel: "A delicadeza do papel como suporte permite uma fluidez única nas minhas pinturas, explorando a transparência e leveza das cores.",
+    arquivos: "Uma seleção de obras históricas do meu acervo pessoal, representando diferentes fases e experimentações ao longo da minha trajetória artística."
+  });
+
   // Effect to load saved data from localStorage when component mounts
   useEffect(() => {
     const savedFooterData = localStorage.getItem('footerContent');
@@ -77,6 +94,20 @@ export function AdminSiteContent() {
         console.error("Error parsing footer data:", error);
       }
     }
+
+    // Carregar descrições das categorias
+    const savedCategoryDescriptions = localStorage.getItem('categoryDescriptions');
+    if (savedCategoryDescriptions) {
+      try {
+        const parsedData = JSON.parse(savedCategoryDescriptions);
+        setCategoryDescriptions(prev => ({
+          ...prev,
+          ...parsedData
+        }));
+      } catch (error) {
+        console.error("Erro ao carregar descrições das categorias:", error);
+      }
+    }
   }, []);
 
   const handleSave = () => {
@@ -92,6 +123,9 @@ export function AdminSiteContent() {
       socialLinksVisibility
     };
     localStorage.setItem('footerContent', JSON.stringify(footerData));
+    
+    // Save category descriptions
+    localStorage.setItem('categoryDescriptions', JSON.stringify(categoryDescriptions));
     
     // Display success toast
     toast({
@@ -114,6 +148,26 @@ export function AdminSiteContent() {
     }));
   };
 
+  const handleCategoryDescriptionChange = (category: Category, value: string) => {
+    setCategoryDescriptions(prev => ({
+      ...prev,
+      [category]: value
+    }));
+  };
+
+  const categories: { value: Category; label: string }[] = [
+    { value: "all", label: "Todos" },
+    { value: "pintura", label: "Pintura" },
+    { value: "pintura_tela", label: "Pintura em Tela" },
+    { value: "pintura_papel", label: "Pintura em Papel" },
+    { value: "escultura", label: "Escultura" },
+    { value: "digital", label: "Arte Digital" },
+    { value: "instalacao", label: "Instalação" },
+    { value: "fotografia", label: "Fotografia" },
+    { value: "desenhos", label: "Desenhos" },
+    { value: "arquivos", label: "Obras de Arquivos" },
+  ];
+
   return (
     <Card>
       <CardHeader>
@@ -124,8 +178,9 @@ export function AdminSiteContent() {
       </CardHeader>
       <CardContent className="space-y-6">
         <Tabs defaultValue="general">
-          <TabsList className="grid grid-cols-3 mb-6">
+          <TabsList className="grid grid-cols-4 mb-6">
             <TabsTrigger value="general">Conteúdo Geral</TabsTrigger>
+            <TabsTrigger value="portfolio">Portfólio</TabsTrigger>
             <TabsTrigger value="footer">Rodapé</TabsTrigger>
             <TabsTrigger value="social">Redes Sociais</TabsTrigger>
           </TabsList>
@@ -158,6 +213,59 @@ export function AdminSiteContent() {
                 onChange={(e) => setAboutText(e.target.value)}
                 rows={5}
               />
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="portfolio" className="space-y-6">
+            <div className="mb-4">
+              <h3 className="text-lg font-medium mb-2">Descrições das Categorias do Portfólio</h3>
+              <p className="text-sm text-muted-foreground mb-6">
+                Personalize os textos que aparecem para cada categoria no portfólio.
+              </p>
+              
+              <Tabs defaultValue="all" className="w-full">
+                <div className="overflow-x-auto pb-2">
+                  <TabsList className="flex flex-wrap gap-2 mb-6 h-auto bg-transparent min-w-max">
+                    {categories.map((category) => (
+                      <TabsTrigger 
+                        key={category.value} 
+                        value={category.value}
+                        className="px-3 py-1.5 text-sm md:px-4 md:py-2 md:text-base rounded-full border border-muted 
+                          data-[state=active]:bg-primary data-[state=active]:text-primary-foreground 
+                          data-[state=active]:shadow-sm data-[state=active]:font-medium
+                          transition-all duration-200"
+                      >
+                        {category.label}
+                      </TabsTrigger>
+                    ))}
+                  </TabsList>
+                </div>
+                
+                {categories.map((category) => (
+                  <TabsContent 
+                    key={category.value} 
+                    value={category.value} 
+                    className="mt-4 border rounded-lg p-4 shadow-sm transition-all duration-200"
+                  >
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between border-b pb-2 mb-2">
+                        <h4 className="text-md font-medium">{category.label}</h4>
+                      </div>
+                      <Textarea
+                        id={`category-${category.value}`}
+                        value={categoryDescriptions[category.value]}
+                        onChange={(e) => handleCategoryDescriptionChange(category.value, e.target.value)}
+                        rows={5}
+                        className="mb-1"
+                        placeholder={`Descrição para a categoria ${category.label}...`}
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        Este texto será exibido quando a categoria {category.label} estiver selecionada.
+                      </p>
+                    </div>
+                  </TabsContent>
+                ))}
+              </Tabs>
             </div>
           </TabsContent>
           
@@ -348,10 +456,7 @@ export function AdminSiteContent() {
         </Tabs>
       </CardContent>
       <CardFooter>
-        <Button 
-          onClick={handleSave} 
-          className="w-full md:w-auto bg-beige hover:bg-beige/90 text-foreground"
-        >
+        <Button onClick={handleSave} className="ml-auto">
           Salvar Alterações
         </Button>
       </CardFooter>
