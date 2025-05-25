@@ -53,6 +53,32 @@ export function Footer() {
     }
   });
 
+  // Detectar tema escuro
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  useEffect(() => {
+    // Verificar o tema inicial
+    const isDark = document.documentElement.classList.contains('dark');
+    setIsDarkMode(isDark);
+
+    // Observar mudanças no tema
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.attributeName === 'class') {
+          const isDark = document.documentElement.classList.contains('dark');
+          setIsDarkMode(isDark);
+        }
+      });
+    });
+
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class']
+    });
+
+    return () => observer.disconnect();
+  }, []);
+
   // Get footer content from localStorage on component mount
   useEffect(() => {
     const savedFooterData = localStorage.getItem('footerContent');
@@ -82,12 +108,19 @@ export function Footer() {
   }, []);
 
   return (
-    <footer className="border-t py-12" style={{ backgroundColor: "#F4EEE1" }}>
+    <footer 
+      className="border-t py-12"
+      style={{ 
+        backgroundColor: isDarkMode ? "#251B15" : "#F4EEE1",
+        color: isDarkMode ? "#F4EEE1" : "#5B431A",
+        borderTopColor: "#C39D55" 
+      }}
+    >
       <div className="container-custom">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div>
-            <h3 className="font-playfair text-xl mb-4" style={{ color: "#5B431A" }}>{footerContent.title}</h3>
-            <p className="max-w-xs mb-6" style={{ color: "#5B431A" }}>
+            <h3 className="font-playfair text-xl mb-4" style={{ color: isDarkMode ? "#F4EEE1" : "#5B431A" }}>{footerContent.title}</h3>
+            <p className="max-w-xs mb-6" style={{ color: isDarkMode ? "#F4EEE1" : "#5B431A" }}>
               {footerContent.description}
             </p>
             
@@ -99,7 +132,7 @@ export function Footer() {
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="transition-colors"
-                  style={{ color: "#5B431A" }}
+                  style={{ color: isDarkMode ? "#F4EEE1" : "#5B431A" }}
                   aria-label="Instagram"
                 >
                   <Instagram size={20} />
@@ -111,7 +144,7 @@ export function Footer() {
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="transition-colors"
-                  style={{ color: "#5B431A" }}
+                  style={{ color: isDarkMode ? "#F4EEE1" : "#5B431A" }}
                   aria-label="Facebook"
                 >
                   <Facebook size={20} />
@@ -123,7 +156,7 @@ export function Footer() {
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="transition-colors"
-                  style={{ color: "#5B431A" }}
+                  style={{ color: isDarkMode ? "#F4EEE1" : "#5B431A" }}
                   aria-label="Twitter"
                 >
                   <Twitter size={20} />
@@ -135,7 +168,7 @@ export function Footer() {
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="transition-colors"
-                  style={{ color: "#5B431A" }}
+                  style={{ color: isDarkMode ? "#F4EEE1" : "#5B431A" }}
                   aria-label="LinkedIn"
                 >
                   <Linkedin size={20} />
@@ -147,7 +180,7 @@ export function Footer() {
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="transition-colors"
-                  style={{ color: "#5B431A" }}
+                  style={{ color: isDarkMode ? "#F4EEE1" : "#5B431A" }}
                   aria-label="YouTube"
                 >
                   <Youtube size={20} />
@@ -157,40 +190,45 @@ export function Footer() {
           </div>
           
           <div>
-            <h3 className="font-playfair text-xl mb-4" style={{ color: "#5B431A" }}>Links</h3>
+            <h3 className="font-playfair text-xl mb-4" style={{ color: isDarkMode ? "#F4EEE1" : "#5B431A" }}>Links</h3>
             <nav className="flex flex-col space-y-2">
-              <NavLink to="/" className="transition-colors hover:font-medium" style={{ color: "#5B431A" }}>
+              <NavLink to="/" className="transition-colors hover:font-medium" style={{ color: isDarkMode ? "#F4EEE1" : "#5B431A" }}>
                 Jaqueline
               </NavLink>
-              <NavLink to="/portfolio" className="transition-colors hover:font-medium" style={{ color: "#5B431A" }}>
+              <NavLink to="/portfolio" className="transition-colors hover:font-medium" style={{ color: isDarkMode ? "#F4EEE1" : "#5B431A" }}>
                 Portfólio
               </NavLink>
-              <NavLink to="/loja" className="transition-colors hover:font-medium" style={{ color: "#5B431A" }}>
+              <NavLink to="/loja" className="transition-colors hover:font-medium" style={{ color: isDarkMode ? "#F4EEE1" : "#5B431A" }}>
                 Loja
               </NavLink>
-              <NavLink to="/contato" className="transition-colors hover:font-medium" style={{ color: "#5B431A" }}>
+              <NavLink to="/contato" className="transition-colors hover:font-medium" style={{ color: isDarkMode ? "#F4EEE1" : "#5B431A" }}>
                 Contato & Encomenda
               </NavLink>
-              <NavLink to="/blog" className="transition-colors hover:font-medium" style={{ color: "#5B431A" }}>
+              <NavLink to="/blog" className="transition-colors hover:font-medium" style={{ color: isDarkMode ? "#F4EEE1" : "#5B431A" }}>
                 Blog
               </NavLink>
-              <NavLink to="/apoiador" className="transition-colors hover:font-medium" style={{ color: "#5B431A" }}>
+              <NavLink to="/apoiador" className="transition-colors hover:font-medium" style={{ color: isDarkMode ? "#F4EEE1" : "#5B431A" }}>
                 Seja um Apoiador
               </NavLink>
             </nav>
           </div>
           
           <div>
-            <h3 className="font-playfair text-xl mb-4" style={{ color: "#5B431A" }}>Contato</h3>
-            <address className="not-italic" style={{ color: "#5B431A" }}>
+            <h3 className="font-playfair text-xl mb-4" style={{ color: isDarkMode ? "#F4EEE1" : "#5B431A" }}>Contato</h3>
+            <address className="not-italic" style={{ color: isDarkMode ? "#F4EEE1" : "#5B431A" }}>
               <p>{footerContent.address}</p>
               <p className="mt-2">{footerContent.email}</p>
               <p className="mt-2">{footerContent.phone}</p>
             </address>
           </div>
         </div>
-        
-        <div className="mt-12 pt-6 border-t text-center text-sm" style={{ borderColor: "#5B431A", color: "#5B431A" }}>
+      </div>
+      
+      {/* Linha horizontal que ocupa toda a largura da tela */}
+      <div className="w-full h-px mt-12" style={{ backgroundColor: "#C39D55" }}></div>
+      
+      <div className="container-custom">
+        <div className="pt-6 text-center text-sm" style={{ color: isDarkMode ? "#F4EEE1" : "#5B431A" }}>
           <p>{footerContent.copyright}</p>
         </div>
       </div>
