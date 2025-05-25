@@ -113,7 +113,7 @@ export function Footer() {
       style={{ 
         backgroundColor: isDarkMode ? "#251B15" : "#F4EEE1",
         color: isDarkMode ? "#F4EEE1" : "#5B431A",
-        borderTopColor: "#C39D55" 
+        borderTopColor: isDarkMode ? "#503C30" : "#C39D55" 
       }}
     >
       <div className="container-custom">
@@ -225,7 +225,7 @@ export function Footer() {
       </div>
       
       {/* Linha horizontal que ocupa toda a largura da tela */}
-      <div className="w-full h-px mt-12" style={{ backgroundColor: "#C39D55" }}></div>
+      <div className="w-full h-px mt-12" style={{ backgroundColor: isDarkMode ? "#503C30" : "#C39D55" }}></div>
       
       <div className="container-custom">
         <div className="pt-6 text-center text-sm" style={{ color: isDarkMode ? "#F4EEE1" : "#5B431A" }}>
